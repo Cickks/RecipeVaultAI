@@ -5,6 +5,7 @@ node_modules/
 
 # Expo
 .expo/
+.expo-export-test/
 dist/
 web-build/
 expo-env.d.ts
@@ -20,6 +21,7 @@ expo-env.d.ts
 
 # Metro
 .metro-health-check*
+expo-metro*.log
 
 # debug
 npm-debug.*
@@ -29,6 +31,9 @@ yarn-error.*
 # macOS
 .DS_Store
 *.pem
+
+# IDE
+.idea/
 
 # local env files
 .env*.local
