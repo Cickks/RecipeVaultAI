@@ -5,13 +5,33 @@ import { Button } from "@/components/Button";
 import { Screen } from "@/components/Screen";
 import { TagChip } from "@/components/TagChip";
 import { Text } from "@/components/Text";
-import { sampleRecipes } from "@/data/sampleRecipes";
+import { useRecipe } from "@/features/recipes/useRecipes";
 import { colors, radii, spacing } from "@/theme/tokens";
 
 export default function RecipeDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const recipe = sampleRecipes.find((item) => item.id === id) ?? sampleRecipes[0];
+  const { data: recipe, isLoading } = useRecipe(id);
+
+  if (isLoading) {
+    return (
+      <Screen>
+        <Text variant="title">Loading recipe...</Text>
+      </Screen>
+    );
+  }
+
+  if (!recipe) {
+    return (
+      <Screen>
+        <Button tone="secondary" onPress={() => router.back()}>
+          <ArrowLeft color={colors.ink} size={18} /> Back
+        </Button>
+        <Text variant="title">Recipe not found</Text>
+        <Text variant="caption">This recipe may have been deleted or is not available offline yet.</Text>
+      </Screen>
+    );
+  }
 
   return (
     <Screen>
