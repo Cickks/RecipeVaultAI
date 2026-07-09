@@ -5,11 +5,12 @@ import { Text } from "./Text";
 
 type Props = {
   children: ReactNode;
+  disabled?: boolean;
   onPress?: () => void;
   tone?: "primary" | "secondary";
 };
 
-export function Button({ children, onPress, tone = "primary" }: Props) {
+export function Button({ children, disabled = false, onPress, tone = "primary" }: Props) {
   const content =
     typeof children === "string" || typeof children === "number" ? (
       <Text style={tone === "primary" ? styles.primaryText : styles.secondaryText}>{children}</Text>
@@ -20,8 +21,10 @@ export function Button({ children, onPress, tone = "primary" }: Props) {
   return (
     <Pressable
       accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => [styles.button, styles[tone], pressed && styles.pressed]}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
+      onPress={disabled ? undefined : onPress}
+      style={({ pressed }) => [styles.button, styles[tone], disabled && styles.disabled, pressed && styles.pressed]}
     >
       {content}
     </Pressable>
@@ -44,6 +47,9 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.82,
+  },
+  disabled: {
+    opacity: 0.5,
   },
   content: {
     alignItems: "center",

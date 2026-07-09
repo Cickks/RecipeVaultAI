@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Button } from "@/components/Button";
@@ -8,30 +8,84 @@ import { useAuthStore } from "@/features/auth/useAuthStore";
 import { colors, radii, spacing } from "@/theme/tokens";
 
 export default function AuthScreen() {
-  const [mode, setMode] = useState<"login" | "register">("register");
+  const [email, setEmail] = useState("");
+  const [mode, setMode] = useState<"forgot" | "login" | "register">("register");
+  const [password, setPassword] = useState("");
+  const [notice, setNotice] = useState<string | null>(null);
   const router = useRouter();
-  const setAuthMode = useAuthStore((state) => state.setMode);
+  const authMode = useAuthStore((state) => state.mode);
+  const clearError = useAuthStore((state) => state.clearError);
+  const error = useAuthStore((state) => state.error);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const resetPassword = useAuthStore((state) => state.resetPassword);
+  const signIn = useAuthStore((state) => state.signIn);
+  const signUp = useAuthStore((state) => state.signUp);
+
+  useEffect(() => {
+    if (authMode === "signed-in") {
+      router.replace("/(tabs)");
+    }
+  }, [authMode, router]);
+
+  async function submit() {
+    clearError();
+    setNotice(null);
+
+    if (mode === "forgot") {
+      const sent = await resetPassword(email);
+      if (sent) {
+        setNotice("Password reset instructions are on the way if this email has an account.");
+      }
+      return;
+    }
+
+    const succeeded = mode === "register" ? await signUp({ email, password }) : await signIn({ email, password });
+    if (succeeded && mode === "register") {
+      setNotice("Check your email to verify your account before signing in.");
+    }
+  }
 
   return (
     <Screen>
-      <Text variant="title">{mode === "register" ? "Create your cookbook" : "Welcome back"}</Text>
-      <Text variant="caption">Supabase Auth will handle email verification, password reset, and secure sessions.</Text>
-      <TextInput accessibilityLabel="Email" autoCapitalize="none" keyboardType="email-address" placeholder="Email" style={styles.input} />
-      <TextInput accessibilityLabel="Password" placeholder="Password" secureTextEntry style={styles.input} />
-      <Button
-        onPress={() => {
-          setAuthMode("signed-in");
-          router.replace("/(tabs)");
-        }}
-      >
-        {mode === "register" ? "Create account" : "Log in"}
+      <Text variant="title">{mode === "register" ? "Create your cookbook" : mode === "login" ? "Welcome back" : "Reset password"}</Text>
+      <Text variant="caption">Supabase Auth handles secure sessions, email verification, and password recovery.</Text>
+      <TextInput
+        accessibilityLabel="Email"
+        autoCapitalize="none"
+        autoComplete="email"
+        keyboardType="email-address"
+        onChangeText={setEmail}
+        placeholder="Email"
+        style={styles.input}
+        value={email}
+      />
+      {mode !== "forgot" ? (
+        <TextInput
+          accessibilityLabel="Password"
+          autoComplete={mode === "register" ? "new-password" : "password"}
+          onChangeText={setPassword}
+          placeholder="Password"
+          secureTextEntry
+          style={styles.input}
+          value={password}
+        />
+      ) : null}
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {notice ? <Text style={styles.notice}>{notice}</Text> : null}
+      <Button disabled={isLoading} onPress={submit}>
+        {isLoading ? "Working..." : mode === "register" ? "Create account" : mode === "login" ? "Log in" : "Send reset email"}
       </Button>
-      <Button tone="secondary" onPress={() => setMode(mode === "register" ? "login" : "register")}>
-        {mode === "register" ? "I already have an account" : "Create a new account"}
+      {mode !== "forgot" ? (
+        <Button tone="secondary" onPress={() => setMode(mode === "register" ? "login" : "register")}>
+          {mode === "register" ? "I already have an account" : "Create a new account"}
+        </Button>
+      ) : null}
+      <Button tone="secondary" onPress={() => setMode(mode === "forgot" ? "login" : "forgot")}>
+        {mode === "forgot" ? "Back to login" : "Forgot password"}
       </Button>
       <View style={styles.note}>
-        <Text variant="heading">Forgot password and email verification</Text>
-        <Text variant="caption">These routes should call `supabase.auth.resetPasswordForEmail` and rely on Supabase email verification before production.</Text>
+        <Text variant="heading">Secure by default</Text>
+        <Text variant="caption">Auth stays disabled until Supabase environment values are configured. No secrets belong in source control.</Text>
       </View>
     </Screen>
   );
@@ -51,5 +105,13 @@ const styles = StyleSheet.create({
     borderRadius: radii.lg,
     gap: spacing.sm,
     padding: spacing.lg,
+  },
+  error: {
+    color: colors.tomato,
+    fontWeight: "800",
+  },
+  notice: {
+    color: colors.sage,
+    fontWeight: "800",
   },
 });
