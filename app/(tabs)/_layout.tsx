@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { BookOpen, CalendarDays, Home, PlusCircle, Search, ShoppingBasket } from "lucide-react-native";
+import { BookOpen, CalendarDays, Home, PlusCircle, Search, ShoppingBasket, UserCircle } from "lucide-react-native";
 import { colors } from "@/theme/tokens";
 
 export default function TabsLayout() {
@@ -24,7 +24,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="search" options={{ title: "Search", tabBarIcon: ({ color }) => <Search color={color} size={22} /> }} />
       <Tabs.Screen name="grocery" options={{ title: "Groceries", tabBarIcon: ({ color }) => <ShoppingBasket color={color} size={22} /> }} />
       <Tabs.Screen name="planner" options={{ title: "Plan", tabBarIcon: ({ color }) => <CalendarDays color={color} size={22} /> }} />
-      <Tabs.Screen name="profile" options={{ href: null }} />
+      <Tabs.Screen name="profile" options={{ title: "Profile", tabBarIcon: ({ color }) => <UserCircle color={color} size={22} /> }} />
     </Tabs>
   );
 }

@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { Children, ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { colors, radii, spacing } from "@/theme/tokens";
 import { Text } from "./Text";
@@ -11,12 +11,15 @@ type Props = {
 };
 
 export function Button({ children, disabled = false, onPress, tone = "primary" }: Props) {
-  const content =
-    typeof children === "string" || typeof children === "number" ? (
-      <Text style={tone === "primary" ? styles.primaryText : styles.secondaryText}>{children}</Text>
+  const textStyle = tone === "primary" ? styles.primaryText : styles.secondaryText;
+  const normalizedChildren = Children.map(children, (child) =>
+    typeof child === "string" || typeof child === "number" ? (
+      <Text style={textStyle}>{child}</Text>
     ) : (
-      <View style={styles.content}>{children}</View>
-    );
+      child
+    ),
+  );
+  const content = normalizedChildren?.length === 1 ? normalizedChildren[0] : <View style={styles.content}>{normalizedChildren}</View>;
 
   return (
     <Pressable

@@ -12,11 +12,13 @@ export default function AuthScreen() {
   const [mode, setMode] = useState<"forgot" | "login" | "register">("register");
   const [password, setPassword] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
+  const [verificationSent, setVerificationSent] = useState(false);
   const router = useRouter();
   const authMode = useAuthStore((state) => state.mode);
   const clearError = useAuthStore((state) => state.clearError);
   const error = useAuthStore((state) => state.error);
   const isLoading = useAuthStore((state) => state.isLoading);
+  const resendVerification = useAuthStore((state) => state.resendVerification);
   const resetPassword = useAuthStore((state) => state.resetPassword);
   const signIn = useAuthStore((state) => state.signIn);
   const signUp = useAuthStore((state) => state.signUp);
@@ -41,8 +43,16 @@ export default function AuthScreen() {
 
     const succeeded = mode === "register" ? await signUp({ email, password }) : await signIn({ email, password });
     if (succeeded && mode === "register") {
+      setVerificationSent(true);
       setNotice("Check your email to verify your account before signing in.");
     }
+  }
+
+  async function resend() {
+    clearError();
+    setNotice(null);
+    const sent = await resendVerification(email);
+    if (sent) setNotice("A new verification email is on the way.");
   }
 
   return (
@@ -75,6 +85,11 @@ export default function AuthScreen() {
       <Button disabled={isLoading} onPress={submit}>
         {isLoading ? "Working..." : mode === "register" ? "Create account" : mode === "login" ? "Log in" : "Send reset email"}
       </Button>
+      {mode === "register" && verificationSent ? (
+        <Button disabled={isLoading} tone="secondary" onPress={resend}>
+          Resend verification email
+        </Button>
+      ) : null}
       {mode !== "forgot" ? (
         <Button tone="secondary" onPress={() => setMode(mode === "register" ? "login" : "register")}>
           {mode === "register" ? "I already have an account" : "Create a new account"}

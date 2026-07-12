@@ -15,6 +15,8 @@ export default function RootLayout() {
       >
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="auth" />
+        <Stack.Screen name="auth/callback" />
+        <Stack.Screen name="auth/recovery" />
         <Stack.Screen name="recipe/[id]" />
         <Stack.Screen name="ai-import" />
         <Stack.Screen name="admin" />
