@@ -31,6 +31,8 @@ For native modules that require a development build, use the generated Android/i
 - Product docs, PRD, architecture, design system, app store checklist, and deployment guide.
 - Premium mobile dashboard, recipe browsing, add recipe, search, grocery list, meal planner, profile/settings, and auth screens.
 - Project-specific workspace usage map in `docs/WORKSPACE_SKILL_AGENT_USAGE.md`.
+- Phase gates and publication path in `docs/ROADMAP.md`.
+- Endpoint, secret, and AI prompt guardrails in `docs/SECURITY.md`.
 
 ## Quality Commands
 
