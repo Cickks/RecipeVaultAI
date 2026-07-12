@@ -2,7 +2,7 @@
 
 Session date: 2026-07-12
 Current branch: `agent/phase1-supabase-security`
-HEAD: `e9edbc5 Document security and production roadmap`
+HEAD at handoff update: `45c4e85 Add persistent project documentation`
 
 ## Today's Accomplishments
 
@@ -24,7 +24,7 @@ Already committed before this documentation pass:
 - Supabase migration ownership constraints.
 - README, architecture, roadmap, security, and setup documentation.
 
-Current uncommitted documentation pass:
+Persistent documentation committed in `45c4e85` and pushed to PR #3:
 
 - `PROJECT_CONTEXT.md`
 - `DECISION_LOG.md`
@@ -53,7 +53,7 @@ Key inspection commands in the latest documentation pass:
 - `git diff --check`
 - `rg -n ... PROJECT_CONTEXT.md DECISION_LOG.md FEATURE_STATUS.md SESSION_HANDOFF.md TECH_STACK.md docs/AI_WORKFLOW.md`
 
-The six new documentation files have not yet been committed or pushed.
+The six new documentation files are committed and pushed. The GitHub Actions run triggered by that commit was in progress when this handoff was updated.
 
 ## Pull Requests
 
