@@ -17,7 +17,19 @@ export function Providers({ children }: { children: ReactNode }) {
       }),
   );
 
-  useEffect(() => useAuthStore.getState().initialize(), []);
+  useEffect(() => {
+    const stopAuthListener = useAuthStore.getState().initialize();
+    const stopCacheListener = useAuthStore.subscribe((state, previousState) => {
+      if (state.user?.id !== previousState.user?.id) {
+        queryClient.clear();
+      }
+    });
+
+    return () => {
+      stopAuthListener?.();
+      stopCacheListener();
+    };
+  }, [queryClient]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

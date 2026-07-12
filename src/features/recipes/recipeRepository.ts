@@ -1,5 +1,5 @@
 import { sampleRecipes } from "@/data/sampleRecipes";
-import { supabase } from "@/lib/supabase";
+import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import { Recipe } from "@/types/recipe";
 import { buildLocalRecipeDraft, searchRecipes } from "./recipeUtils";
 
@@ -92,10 +92,14 @@ async function getSupabaseUserId() {
 export const recipeRepository = {
   async create(input: CreateRecipeInput) {
     const userId = await getSupabaseUserId();
-    if (!supabase || !userId) {
+    if (!isSupabaseConfigured) {
       const draft = buildLocalRecipeDraft(input);
       localRecipes = [draft, ...localRecipes];
       return draft;
+    }
+
+    if (!supabase || !userId) {
+      throw new Error("Sign in before saving recipes.");
     }
 
     const draft = buildLocalRecipeDraft(input);
@@ -149,8 +153,12 @@ export const recipeRepository = {
   },
   async getById(id: string) {
     const userId = await getSupabaseUserId();
-    if (!supabase || !userId) {
+    if (!isSupabaseConfigured) {
       return localRecipes.find((recipe) => recipe.id === id) ?? null;
+    }
+
+    if (!supabase || !userId) {
+      return null;
     }
 
     const { data: recipe, error } = await supabase.from("recipes").select("*").eq("id", id).single<RecipeRow>();
@@ -165,8 +173,12 @@ export const recipeRepository = {
   },
   async list(query = "") {
     const userId = await getSupabaseUserId();
-    if (!supabase || !userId) {
+    if (!isSupabaseConfigured) {
       return searchRecipes(localRecipes, query);
+    }
+
+    if (!supabase || !userId) {
+      return [];
     }
 
     const { data, error } = await supabase.from("recipes").select("*").order("updated_at", { ascending: false });

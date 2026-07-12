@@ -31,5 +31,7 @@ Phase 1 stores sample/local state and detects network status. Phase 2 adds a dur
 ## AI Strategy
 AI import is an independent service boundary. The mobile app submits pasted text/captions/transcripts to a backend function. The function validates input, calls an AI provider, returns structured JSON, and the user reviews every field before saving.
 
+Backend AI endpoints must authenticate and authorize callers, validate inputs and outputs, enforce shared per-user abuse and cost limits, and keep provider secrets outside the mobile bundle. Static privileged prompts are version controlled. User content is clearly delimited, escaped or encoded, and sent only as untrusted user/data content; it must never be interpolated into system or developer instructions. See `docs/SECURITY.md`.
+
 ## Monetization Strategy
 Entitlements are abstracted behind a `useEntitlements` hook and future RevenueCat repository. Free, Pro one-time purchase, and Premium subscription can coexist without redesigning feature checks.

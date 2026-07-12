@@ -30,7 +30,8 @@ create table if not exists public.recipes (
   source_url text,
   video_url text,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  unique (id, user_id)
 );
 
 create table if not exists public.recipe_ingredients (
@@ -41,7 +42,8 @@ create table if not exists public.recipe_ingredients (
   amount text,
   unit text,
   name text not null,
-  notes text
+  notes text,
+  foreign key (recipe_id, user_id) references public.recipes(id, user_id) on delete cascade
 );
 
 create table if not exists public.recipe_instructions (
@@ -50,7 +52,8 @@ create table if not exists public.recipe_instructions (
   user_id uuid not null references auth.users(id) on delete cascade,
   position integer not null,
   body text not null,
-  timer_minutes integer
+  timer_minutes integer,
+  foreign key (recipe_id, user_id) references public.recipes(id, user_id) on delete cascade
 );
 
 create table if not exists public.recipe_images (
@@ -60,7 +63,8 @@ create table if not exists public.recipe_images (
   storage_path text not null,
   alt_text text,
   position integer not null default 0,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  foreign key (recipe_id, user_id) references public.recipes(id, user_id) on delete cascade
 );
 
 create table if not exists public.collections (
@@ -69,6 +73,7 @@ create table if not exists public.collections (
   name text not null,
   color text,
   created_at timestamptz not null default now(),
+  unique (id, user_id),
   unique(user_id, name)
 );
 
@@ -77,13 +82,16 @@ create table if not exists public.collection_recipes (
   recipe_id uuid not null references public.recipes(id) on delete cascade,
   user_id uuid not null references auth.users(id) on delete cascade,
   created_at timestamptz not null default now(),
-  primary key(collection_id, recipe_id)
+  primary key(collection_id, recipe_id),
+  foreign key (collection_id, user_id) references public.collections(id, user_id) on delete cascade,
+  foreign key (recipe_id, user_id) references public.recipes(id, user_id) on delete cascade
 );
 
 create table if not exists public.tags (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
+  unique (id, user_id),
   unique(user_id, name)
 );
 
@@ -91,7 +99,9 @@ create table if not exists public.recipe_tags (
   recipe_id uuid not null references public.recipes(id) on delete cascade,
   tag_id uuid not null references public.tags(id) on delete cascade,
   user_id uuid not null references auth.users(id) on delete cascade,
-  primary key(recipe_id, tag_id)
+  primary key(recipe_id, tag_id),
+  foreign key (recipe_id, user_id) references public.recipes(id, user_id) on delete cascade,
+  foreign key (tag_id, user_id) references public.tags(id, user_id) on delete cascade
 );
 
 create table if not exists public.meal_plans (
@@ -99,6 +109,7 @@ create table if not exists public.meal_plans (
   user_id uuid not null references auth.users(id) on delete cascade,
   week_start date not null,
   created_at timestamptz not null default now(),
+  unique (id, user_id),
   unique(user_id, week_start)
 );
 
@@ -108,7 +119,9 @@ create table if not exists public.meal_plan_recipes (
   recipe_id uuid not null references public.recipes(id) on delete cascade,
   user_id uuid not null references auth.users(id) on delete cascade,
   planned_for date not null,
-  meal_type text not null check (meal_type in ('breakfast','lunch','dinner','snack'))
+  meal_type text not null check (meal_type in ('breakfast','lunch','dinner','snack')),
+  foreign key (meal_plan_id, user_id) references public.meal_plans(id, user_id) on delete cascade,
+  foreign key (recipe_id, user_id) references public.recipes(id, user_id) on delete cascade
 );
 
 create table if not exists public.shopping_lists (
@@ -116,7 +129,8 @@ create table if not exists public.shopping_lists (
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
   created_at timestamptz not null default now(),
-  completed_at timestamptz
+  completed_at timestamptz,
+  unique (id, user_id)
 );
 
 create table if not exists public.shopping_items (
@@ -127,7 +141,8 @@ create table if not exists public.shopping_items (
   amount text,
   category text,
   checked boolean not null default false,
-  position integer not null default 0
+  position integer not null default 0,
+  foreign key (list_id, user_id) references public.shopping_lists(id, user_id) on delete cascade
 );
 
 create table if not exists public.user_settings (

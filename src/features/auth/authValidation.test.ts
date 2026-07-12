@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseAuthCredentials, parsePasswordResetEmail } from "./authValidation";
+import { parseAuthCredentials, parsePasswordResetEmail, parsePasswordUpdate } from "./authValidation";
 
 describe("auth validation", () => {
   it("accepts valid email credentials", () => {
@@ -21,5 +21,10 @@ describe("auth validation", () => {
     if (result.success) {
       expect(result.data).toBe("cook@example.com");
     }
+  });
+
+  it("requires matching passwords when updating a password", () => {
+    expect(parsePasswordUpdate({ confirmPassword: "different123", password: "password123" }).success).toBe(false);
+    expect(parsePasswordUpdate({ confirmPassword: "password123", password: "password123" }).success).toBe(true);
   });
 });

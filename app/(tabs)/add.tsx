@@ -1,10 +1,12 @@
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { StyleSheet, TextInput, View } from "react-native";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { Button } from "@/components/Button";
 import { Screen } from "@/components/Screen";
 import { Text } from "@/components/Text";
+import { useAuthStore } from "@/features/auth/useAuthStore";
 import { useCreateRecipe } from "@/features/recipes/useRecipes";
+import { isSupabaseConfigured } from "@/lib/supabase";
 import { colors, radii, spacing } from "@/theme/tokens";
 
 type FormValues = {
@@ -17,6 +19,7 @@ type FormValues = {
 export default function AddRecipeScreen() {
   const router = useRouter();
   const createRecipe = useCreateRecipe();
+  const authMode = useAuthStore((state) => state.mode);
   const { control, handleSubmit, reset } = useForm<FormValues>({
     defaultValues: {
       title: "",
@@ -34,6 +37,18 @@ export default function AddRecipeScreen() {
     router.push(`/recipe/${recipe.id}`);
   }
 
+  if (isSupabaseConfigured && authMode !== "signed-in") {
+    return (
+      <Screen>
+        <Text variant="title">Sign in to save recipes</Text>
+        <Text variant="caption">RecipeVault AI stores production recipes under your Supabase account with RLS-protected ownership.</Text>
+        <Link href="/auth" asChild>
+          <Button>Sign in or create account</Button>
+        </Link>
+      </Screen>
+    );
+  }
+
   return (
     <Screen>
       <Text variant="title">Add Recipe</Text>
@@ -41,13 +56,23 @@ export default function AddRecipeScreen() {
       <Controller
         control={control}
         name="title"
-        render={({ field }) => <TextInput onBlur={field.onBlur} onChangeText={field.onChange} placeholder="Recipe title" style={styles.input} value={field.value} />}
+        render={({ field }) => (
+          <TextInput accessibilityLabel="Recipe title" onBlur={field.onBlur} onChangeText={field.onChange} placeholder="Recipe title" style={styles.input} value={field.value} />
+        )}
       />
       <Controller
         control={control}
         name="description"
         render={({ field }) => (
-          <TextInput onBlur={field.onBlur} onChangeText={field.onChange} placeholder="Short description" multiline style={[styles.input, styles.multiline]} value={field.value} />
+          <TextInput
+            accessibilityLabel="Recipe description"
+            onBlur={field.onBlur}
+            onChangeText={field.onChange}
+            placeholder="Short description"
+            multiline
+            style={[styles.input, styles.multiline]}
+            value={field.value}
+          />
         )}
       />
       <Text variant="heading">Ingredients</Text>
@@ -57,7 +82,14 @@ export default function AddRecipeScreen() {
           control={control}
           name={`ingredients.${index}.name`}
           render={({ field: input }) => (
-            <TextInput onBlur={input.onBlur} onChangeText={input.onChange} placeholder={`Ingredient ${index + 1}`} style={styles.input} value={input.value} />
+            <TextInput
+              accessibilityLabel={`Ingredient ${index + 1}`}
+              onBlur={input.onBlur}
+              onChangeText={input.onChange}
+              placeholder={`Ingredient ${index + 1}`}
+              style={styles.input}
+              value={input.value}
+            />
           )}
         />
       ))}
@@ -71,7 +103,15 @@ export default function AddRecipeScreen() {
           control={control}
           name={`instructions.${index}.body`}
           render={({ field: input }) => (
-            <TextInput onBlur={input.onBlur} onChangeText={input.onChange} placeholder={`Step ${index + 1}`} multiline style={[styles.input, styles.multiline]} value={input.value} />
+            <TextInput
+              accessibilityLabel={`Direction step ${index + 1}`}
+              onBlur={input.onBlur}
+              onChangeText={input.onChange}
+              placeholder={`Step ${index + 1}`}
+              multiline
+              style={[styles.input, styles.multiline]}
+              value={input.value}
+            />
           )}
         />
       ))}
